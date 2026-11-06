@@ -1,5 +1,20 @@
 # ARIS Research Workspace — Operational Checkpoint
 
+## User-confirmed Windows UI milestone — 2026-11-06
+
+**Confirmed by user:** "it works" after installing the new `index.html` result-view selector and refreshing the locally hosted ARIS workspace. The selector operates in their Windows browser without restarting the Python server or losing the currently displayed Codex answer.
+
+**Selector views:** Research report (default), Findings & evidence, Risks & next actions, Original Codex answer, Technical execution JSON. The first three views rearrange verbatim heading-based content from the existing completed Codex answer; they do **not** create new evidence, perform independent verification, or alter the underlying research text. Technical event JSON is still available for auditing.
+
+**Exact source HEAD before this checkpoint update:** `c9982cc6ac1b846067e7c786427d4209ee5a106d`.
+
+**User-confirmed scope:** Visible selector works. **Not independently verified:** usability of all five individual view outputs, research factual accuracy, source citations, independent cross-model review, persistent reports, overnight unattended operation, and current CI. Do not expand the success claim.
+
+**Next safe milestones:** preserve/export final Codex research response as unverified artifact; improve the readable report only if evidence-backed; optionally add a provenance-aware report export and clearly separated approval gate; validate tests and exact-HEAD CI when available. Keep original ARIS source of truth and open-source reuse-first principle. No merge, deployment or spend without explicit approval.
+
+---
+
+
 **Saved:** 2026-11-06 (Europe/Stockholm)
 **Repository:** https://github.com/gergins/Auto-claude-code-research-in-sleep-forked
 **Working branch:** `prototype/aris-workflow-launcher-20261106`
