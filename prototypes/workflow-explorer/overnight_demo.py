@@ -246,7 +246,7 @@ class Handler(BaseHTTPRequestHandler):
                 minutes = request.get("minutes")
                 if type(minutes) is not int:
                     raise ValueError("Invalid time limit")
-                current = LIVE.start(request.get("skill"), request.get("goal"), minutes)
+                current = LIVE.start(request.get("skill"), request.get("goal"), minutes, request.get("model", "gpt-6-astra"))
             except (ValueError, RuntimeError) as exc:
                 self.send(400, str(exc), "text/plain"); return
             self.send(202, json.dumps({"started": True, "run_id": current["run_id"]}),
