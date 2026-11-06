@@ -5,10 +5,31 @@
 :root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#eaf1fb;background:#0b1220}*{box-sizing:border-box}body{margin:0}button,input,textarea,select{font:inherit}a{color:#9ad8ff}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #88d8ff;outline-offset:2px}.wrap{max-width:1350px;margin:auto;padding:24px}.head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;border-bottom:1px solid #28344a;padding-bottom:20px}.logo{background:#143a44;color:#69efcf;padding:10px;border-radius:12px;font-weight:800}.brand{display:flex;align-items:center;gap:14px}.muted{color:#9caeca;font-size:14px}h1{font-size:clamp(27px,4vw,44px);margin:22px 0 7px}h2{font-size:19px;margin:0 0 14px}.pill{display:inline-block;border:1px solid #3b5068;border-radius:30px;padding:6px 10px;color:#b9cce4;font-size:12px}.tag{background:#153c37;color:#8cedd2}.hero{padding:20px 0 28px}.grid{display:grid;grid-template-columns:1fr 390px;gap:18px}.panel{border:1px solid #293a51;border-radius:18px;background:#111d2f;padding:18px}.tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}.tools input{flex:1;min-width:190px}.tools input,.field,input,textarea,select{background:#0b1626;color:#ecf5ff;border:1px solid #3b4c65;border-radius:10px;padding:12px;width:100%}.filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:17px}.filter{border:1px solid #3e4f67;background:#172338;color:#d0dded;padding:8px 12px;border-radius:18px}.filter.active{background:#174b48;border-color:#58dbbf;color:#cffff0}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.skill{border:1px solid #35445b;border-radius:13px;background:#17253a;text-align:left;padding:16px;color:#f1f6ff;min-height:155px;display:flex;flex-direction:column;gap:10px}.skill.selected{border:2px solid #6deac9;padding:15px;background:#1a3440}.skill:hover{border-color:#84c4dc}.skill strong{font-size:16px}.skill span{font-size:13px;color:#aabbcf;line-height:1.5}.skill small{color:#70dfce}.sticky{position:sticky;top:20px;align-self:start}.formrow{margin:16px 0}label{display:block;font-weight:600;margin-bottom:7px;font-size:13px}textarea{min-height:115px;resize:vertical}.primary{border:0;background:#65e5c3;color:#082b2b;padding:12px 15px;border-radius:10px;font-weight:800}.secondary{border:1px solid #587189;background:#1a3048;color:white;padding:12px 15px;border-radius:10px}pre{white-space:pre-wrap;word-break:break-word;background:#07111e;border:1px solid #30435a;padding:14px;border-radius:11px;color:#b9ffdb;min-height:76px;font-size:12px}details{margin:12px 0;color:#aebfda}summary{cursor:pointer;color:#e4edfa}.notice{border-left:3px solid #e7bb68;background:#312b24;padding:13px 14px;border-radius:8px;color:#ffe1ab;font-size:13px;line-height:1.5;margin-top:16px}.footer{border-top:1px solid #29384c;margin-top:28px;padding:18px 0;color:#90a4bd;font-size:13px}#empty{padding:20px;color:#9aafc7}#copied{margin-left:8px;color:#a9ffde;font-size:13px}a.small{font-size:13px} .info{display:flex;gap:9px;flex-wrap:wrap;align-items:center}@media(max-width:900px){.grid{grid-template-columns:1fr}.sticky{position:static}}@media(max-width:540px){.cards{grid-template-columns:1fr}.wrap{padding:14px}}
 </style></head><body>
 <div class="wrap"><header class="head"><div class="brand"><div class="logo">ARIS ⚔</div><div><strong>Workflow Explorer</strong><div class="muted">Prototype on your actual ARIS fork</div></div></div><div class="info"><span class="pill tag">Original skills · read-only</span><a class="small" href="https://github.com/gergins/Auto-claude-code-research-in-sleep-forked" target="_blank" rel="noopener">View fork ↗</a></div></header>
-<nav aria-label="Prototype sections" class="info" style="margin-top:15px"><a href="#catalog">Browse 87 skills</a><a href="#results">Capture Codex results</a><a href="#monitor">Live monitor</a></nav><section class="hero"><span class="pill">Research, not reinvention</span><h1>Choose an existing ARIS workflow.</h1><p class="muted">Explore the complete 87-skill catalog from the fork, configure an invocation, and copy it into your supported AI coding environment. This interface does not execute agents or incur API costs.</p></section>
+<nav aria-label="Prototype sections" class="info" style="margin-top:15px"><a href="#catalog">Browse 87 skills</a><a href="#results">Capture Codex results</a><a href="#monitor">Local monitor</a><a href="#live">Real Codex run</a></nav><section class="hero"><span class="pill">Research, not reinvention</span><h1>Choose an existing ARIS workflow.</h1><p class="muted">Explore the complete 87-skill catalog from the fork, configure an invocation, and copy it into your supported AI coding environment. This interface does not execute agents or incur API costs.</p></section>
 <div class="grid"><main class="panel" id="catalog"><h2>All documented ARIS skills <span id="count" class="muted"></span></h2><div class="tools"><label for="search" style="position:absolute;left:-9999px">Search skills</label><input id="search" placeholder="Search workflows, e.g. literature, review, experiment" autocomplete="off"></div><div class="filters" role="group" aria-label="Skill category"><button class="filter active" data-cat="All">All</button><button class="filter" data-cat="Discover">Discover</button><button class="filter" data-cat="Validate">Validate</button><button class="filter" data-cat="Build">Build</button><button class="filter" data-cat="Publish">Publish</button><button class="filter" data-cat="Improve">Improve</button></div><div class="cards" id="cards"></div><p id="empty" hidden>No matching skills found.</p><p class="muted" style="margin-top:18px">All 87 catalog entries are shown from the fork’s original skill definitions. “Requirements” are upstream documentation, not proof of installed tools.</p></main>
 <aside class="panel sticky"><h2>Configure workflow</h2><div class="muted" id="description">Choose a workflow to see its original source.</div><div class="formrow"><label for="direction">Your research direction or task</label><textarea id="direction" placeholder="Example: Find maintained open-source approaches to accessible video relay, compare licensing and risks"></textarea></div><div class="formrow"><label for="effort">Effort / resource budget</label><select id="effort"><option value="lite">Lite — smallest budget</option><option value="balanced" selected>Balanced — normal</option><option value="max">Max — deeper research</option><option value="beast">Beast — highest effort</option></select></div><div class="formrow"><label for="reviewer">Reviewer preference</label><select id="reviewer"><option value="">Use configured reviewer</option><option value="codex">Codex</option><option value="claude-code">Claude Code</option><option value="antigravity">Antigravity</option><option value="grok">Grok</option></select></div><label for="command">Generated invocation (not executed)</label><pre id="command" tabindex="0"></pre><button class="primary" id="copy">Copy invocation</button><span id="copied" role="status"></span><div class="formrow"><a id="source" target="_blank" rel="noopener" href="#">Inspect original SKILL.md ↗</a></div><details><summary>How to actually run it</summary><p class="muted">Install and configure ARIS in a compatible environment following the fork's SETUP_GUIDE.md. Check model/provider access and cost first. Then paste the copied invocation into that environment. This browser prototype does not run the workflow.</p><a class="small" href="https://github.com/gergins/Auto-claude-code-research-in-sleep-forked/blob/main/SETUP_GUIDE.md" target="_blank" rel="noopener">Original setup guide ↗</a></details><div class="notice"><strong>Safety boundary:</strong> ARIS skills can request shell access, network calls, file writes, and paid model or GPU services. Inspect their instructions and use an isolated workspace. No automatic execution, deployment, or merge in this prototype.</div></aside></div><div class="panel" id="results" style="margin-top:18px"><h2>Capture research results</h2><p class="muted">After running a skill in a configured AI environment, paste the response here. Export it as an evidence-labeled JSON file for later review. Pasting text does not prove ARIS executed.</p><div class="formrow"><label for="result">Codex / Claude response</label><textarea id="result" placeholder="Paste actual research findings here; avoid secrets and personal data" style="min-height:180px"></textarea></div><div class="formrow"><label for="execution">Execution evidence</label><select id="execution"><option value="unverified">Unverified output (default)</option><option value="skill-recognized">ARIS skill recognized; execution not independently verified</option><option value="evidence-attached">Run evidence available separately (manual review required)</option></select></div><div class="formrow"><label for="importFile">Already exported your Codex JSON?</label><input type="file" id="importFile" accept=".json,application/json" aria-describedby="importHelp"><p class="muted" id="importHelp">Select the JSON you downloaded earlier. It will fill the research text box so you don't need to paste it again.</p></div><div class="info" style="margin-bottom:12px"><button class="primary" id="saveLocal">Save result to local ARIS workspace</button><button class="secondary" id="export">Export research record (JSON)</button></div><p id="saveStatus" class="muted" role="status">Local save is available when the Python server is running at http://127.0.0.1:8765/</p><p class="muted" id="exportStatus" role="status"></p></div>
 
+<section id="live" class="panel" style="margin-top:18px" aria-labelledby="live-heading">
+ <h2 id="live-heading">Run a real ARIS skill with Codex CLI</h2>
+ <p class="muted">Opt-in execution in an isolated read-only working directory. Requires Codex CLI already installed and signed in. This invokes a real AI model and may use paid plan quota/API credits. No spending limit can be guaranteed by this prototype.</p>
+ <p id="live-preflight" role="status" class="notice">Checking local Codex availability…</p>
+ <div class="formrow"><label for="live-skill">Research workflow</label>
+ <select id="live-skill">
+ <option value="research-lit">Research literature (start here)</option>
+ <option value="idea-discovery">Discover ideas</option>
+ <option value="comm-lit-review">Critical literature review</option>
+ <option value="auto-review-loop">Auto-review loop (may require an external reviewer)</option>
+ <option value="research-wiki">Research wiki (read-only mode; writes blocked)</option>
+ <option value="research-pipeline">Full research pipeline (many steps may be blocked in read-only mode)</option>
+ </select></div>
+ <div class="formrow"><label for="live-goal">Research goal</label><textarea id="live-goal" rows="3" maxlength="2000">Find and critically compare proven open-source components for a three-party Deaf video relay service, including LiveKit, LiveKit SIP, Janus, Jitsi, evidence links, risks and missing verification.</textarea></div>
+ <div class="formrow"><label for="live-duration">Maximum allowed runtime</label><select id="live-duration"><option value="10">10 minutes — first test</option><option value="60">60 minutes</option><option value="480">8 hours — unattended, explicit opt-in</option></select></div>
+ <div class="formrow"><label><input type="checkbox" id="live-confirm"> I authorize this bounded Codex CLI research run and understand it may consume credits; the application cannot enforce a monetary limit.</label></div>
+ <div class="info"><button class="primary" id="live-start" disabled>Start real Codex research</button><button class="secondary" id="live-stop" disabled>Stop research</button></div>
+ <p id="live-status" class="muted" role="status" aria-live="polite">Not started.</p>
+ <div class="panel" style="margin-top:12px"><h2>Actual Codex events and result</h2><pre id="live-output" tabindex="0" style="white-space:pre-wrap;max-height:340px;overflow:auto">No execution events.</pre></div>
+ <div class="notice"><strong>Assurance:</strong> Codex output is an AI research artifact, not proof of verified sources, real experiments or independent review. Missing prerequisites must remain blocked. The server must remain running and the PC must stay on. No automatic restart/resume of live processes.</div>
+</section>
 <section id="monitor" class="panel" style="margin-top:18px" aria-labelledby="monitor-heading">
   <div class="head" style="margin-bottom:16px"><div><h2 id="monitor-heading">Live run monitor</h2><p class="muted">Load your saved Codex result, inspect its named candidates and source links, and record real ARIS run-state transitions. This is deterministic indexing, not AI verification.</p></div><span class="pill tag">Local-only · zero model calls</span></div>
   <div class="info" style="margin-bottom:18px"><button id="monitor-start" class="primary" disabled>Start review workflow (local checks)</button><span class="muted" id="monitor-notice" role="status">Checking local monitor connection…</span></div>
@@ -122,4 +143,53 @@ draw();output();
   refresh();setInterval(refresh,800);
 })();
 </script>
-</body></html>
+<script>
+(function(){
+ const $=id=>document.getElementById("live-"+id);
+ const local=/^http:\/\/(?:127\.0\.0\.1|localhost):8765$/.test(location.origin);
+ if(!local){$("preflight").textContent="Live run needs the local Python server, not a file:// page.";return;}
+ let ready=false, busy=false;
+ async function preflight(){
+  try{const r=await fetch("/api/live/check");const x=await r.json();
+   ready=x.available&&x.skill_pack;
+   $("preflight").textContent="Codex CLI: "+(x.available?"found":"not installed/on PATH")+
+   " · ARIS Codex-native skills: "+(x.skill_pack?"found":"missing")+
+   " · Sign-in status: not yet tested.";
+   $("start").disabled=!ready||!$("confirm").checked||busy;
+  }catch(e){$("preflight").textContent="Preflight unavailable: "+e.message;}
+ }
+ async function refresh(){
+  try{const r=await fetch("/api/live/status",{cache:"no-store"});if(!r.ok)throw Error("status unavailable");
+   const x=await r.json();const active=["starting","running","stopping"].includes(x.status);
+   busy=active;
+   $("start").disabled=!ready||!$("confirm").checked||active;
+   $("stop").disabled=!active;
+   $("status").textContent="Status: "+x.status+(x.run_id?" · Run: "+x.run_id:"")+
+    (x.error?" · Error: "+x.error:"")+
+    (x.exit_code!==null?" · Exit: "+x.exit_code:"")+
+    " · Review: "+x.review_status;
+   const messages=x.events.map(e=>e.at+" "+e.message).join("\n");
+   $("output").textContent=(messages?"EVENTS\n"+messages+"\n\n":"")+(x.output||"No Codex output yet.");
+  }catch(e){$("status").textContent="Local process status unavailable: "+e.message}
+ }
+ $("confirm").addEventListener("change",()=>{$("start").disabled=!ready||!$("confirm").checked||busy});
+ $("start").addEventListener("click",async()=>{
+  if(!$("confirm").checked)return;
+  $("start").disabled=true;
+  try{
+   const r=await fetch("/api/live/start",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({skill:$("skill").value,goal:$("goal").value,
+      minutes:Number($("duration").value),confirmed:true})});
+   if(!r.ok)throw Error(await r.text());
+   $("status").textContent="Codex launch requested.";
+   await refresh();
+  }catch(e){$("status").textContent="Could not launch: "+e.message;await preflight()}
+ });
+ $("stop").addEventListener("click",async()=>{
+  $("stop").disabled=true;
+  try{const r=await fetch("/api/live/stop",{method:"POST"});if(!r.ok)throw Error(await r.text());await refresh()}
+  catch(e){$("status").textContent="Could not stop: "+e.message;}
+ });
+ preflight();refresh();setInterval(refresh,1500);
+})();
+</script></body></html>
