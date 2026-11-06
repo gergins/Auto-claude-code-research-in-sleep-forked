@@ -1,11 +1,13 @@
 """Regression: run-state subprocess must emit UTF-8 under Windows cp1252."""
 import importlib.util
 import subprocess
+import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 MODULE = Path(__file__).resolve().parents[1] / "prototypes" / "workflow-explorer" / "overnight_demo.py"
+sys.path.insert(0, str(MODULE.parent))
 spec = importlib.util.spec_from_file_location("aris_offline_demo", MODULE)
 demo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(demo)
