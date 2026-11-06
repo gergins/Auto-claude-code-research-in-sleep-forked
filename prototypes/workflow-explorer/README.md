@@ -1,3 +1,11 @@
+# New: Real ARIS skill execution from the website (opt-in)
+
+A separate **Run a real ARIS skill with Codex CLI** section is now available on the same page. This invokes the configured local Codex CLI with its native ARIS skill pack in an isolated read-only sandbox. It offers bounded 10-minute, 60-minute or eight-hour sessions, live events, stop, and one-click final result capture into the existing local research record workflow.
+
+**For Windows setup and safety limits, read [LIVE_CODEX.md](LIVE_CODEX.md).** The local server must be updated with **all three** current files: `index.html`, `overnight_demo.py` and **`live_codex.py`**. A standalone Codex CLI installation and sign-in is required. Nothing runs automatically, and model usage can consume credits. Full autonomous pipeline and independent verification are not yet established.
+
+---
+
 # Connected Codex Result → Local ARIS State (new)
 
 The web page now supports a genuine **local intake** of a Codex research result: choose the already-exported JSON or paste the response, click **Save result to local ARIS workspace**, and then **Start review workflow (local checks)**. The runner uses the saved result as its input, records a SHA-256 checksum, extracts candidate mentions and source URLs, and writes unaccepted phase artifacts through the existing `tools/run_state.py`. AI reviewer, source fetches and claims verification remain unperformed.
