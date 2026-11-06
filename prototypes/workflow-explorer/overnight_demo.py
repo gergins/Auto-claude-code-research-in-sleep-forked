@@ -31,9 +31,7 @@ def log(message):
         DATA["logs"].append({"time": now(), "message": message})
 
 def state_cmd(*args):
-    proc = subprocess.run([sys.executable, str(ARIS_STATE_TOOL), *map(str, args)],
-                          capture_output=True, text=True, encoding="utf-8",
-                          timeout=15, check=False)
+    # Windows defaults to cp1252 for detached console subprocesses. ARIS prints\n    # Unicode status glyphs (e.g. check marks), so force UTF-8 in the child.\n    env = os.environ.copy()\n    env["PYTHONIOENCODING"] = "utf-8"\n    env["PYTHONUTF8"] = "1"\n    proc = subprocess.run([sys.executable, str(ARIS_STATE_TOOL), *map(str, args)],\n                          capture_output=True, text=True, encoding="utf-8",\n                          env=env, timeout=15, check=False)
     if proc.returncode != 0:
         raise RuntimeError(proc.stderr.strip() or proc.stdout.strip())
     return proc.stdout
