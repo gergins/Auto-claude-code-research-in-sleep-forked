@@ -25,7 +25,7 @@
  <div class="formrow"><label for="live-goal">Research goal</label><textarea id="live-goal" rows="3" maxlength="2000">Find and critically compare proven open-source components for a three-party Deaf video relay service, including LiveKit, LiveKit SIP, Janus, Jitsi, evidence links, risks and missing verification.</textarea></div>
  <div class="formrow"><label for="live-duration">Maximum allowed runtime</label><select id="live-duration"><option value="10">10 minutes — first test</option><option value="60">60 minutes</option><option value="480">8 hours — unattended, explicit opt-in</option></select></div>
  <div class="formrow"><label><input type="checkbox" id="live-confirm"> I authorize this bounded Codex CLI research run and understand it may consume credits; the application cannot enforce a monetary limit.</label></div>
- <div class="info"><button class="primary" id="live-start" disabled>Start real Codex research</button><button class="secondary" id="live-stop" disabled>Stop research</button></div>
+ <div class="info"><button class="primary" id="live-start" disabled>Start real Codex research</button><button class="secondary" id="live-stop" disabled>Stop research</button><button class="secondary" id="live-capture" disabled>Capture Codex result into ARIS</button></div>
  <p id="live-status" class="muted" role="status" aria-live="polite">Not started.</p>
  <div class="panel" style="margin-top:12px"><h2>Actual Codex events and result</h2><pre id="live-output" tabindex="0" style="white-space:pre-wrap;max-height:340px;overflow:auto">No execution events.</pre></div>
  <div class="notice"><strong>Assurance:</strong> Codex output is an AI research artifact, not proof of verified sources, real experiments or independent review. Missing prerequisites must remain blocked. The server must remain running and the PC must stay on. No automatic restart/resume of live processes.</div>
@@ -164,6 +164,7 @@ draw();output();
    busy=active;
    $("start").disabled=!ready||!$("confirm").checked||active;
    $("stop").disabled=!active;
+   $("capture").disabled=x.status!=="finished_unreviewed"||!x.final_response;
    $("status").textContent="Status: "+x.status+(x.run_id?" · Run: "+x.run_id:"")+
     (x.error?" · Error: "+x.error:"")+
     (x.exit_code!==null?" · Exit: "+x.exit_code:"")+
@@ -184,6 +185,16 @@ draw();output();
    $("status").textContent="Codex launch requested.";
    await refresh();
   }catch(e){$("status").textContent="Could not launch: "+e.message;await preflight()}
+ });
+ $("capture").addEventListener("click",async()=>{
+  $("capture").disabled=true;
+  try{
+   const r=await fetch("/api/live/capture",{method:"POST"});
+   if(!r.ok)throw Error(await r.text());
+   const x=await r.json();
+   $("status").textContent="Captured real Codex answer ("+x.record.characters+" characters) into ARIS local records. Go to Local monitor to run deterministic checks.";
+   document.getElementById("monitor")?.scrollIntoView({behavior:"smooth"});
+  }catch(e){$("status").textContent="Capture failed: "+e.message}
  });
  $("stop").addEventListener("click",async()=>{
   $("stop").disabled=true;
