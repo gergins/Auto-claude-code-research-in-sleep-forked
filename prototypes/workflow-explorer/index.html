@@ -152,10 +152,10 @@ draw();output();
  let ready=false, busy=false;
  async function preflight(){
   try{const r=await fetch("/api/live/check");const x=await r.json();
-   ready=x.available&&x.skill_pack;
+   ready=x.available&&x.skill_pack&&x.signed_in;
    $("preflight").textContent="Codex CLI: "+(x.available?"found":"not installed/on PATH")+
    " · ARIS Codex-native skills: "+(x.skill_pack?"found":"missing")+
-   " · Sign-in status: not yet tested.";
+   " · Codex sign-in: "+(x.signed_in?"ready":"missing (run codex login in PowerShell)");
    $("start").disabled=!ready||!$("confirm").checked||busy;
   }catch(e){$("preflight").textContent="Preflight unavailable: "+e.message;}
  }
