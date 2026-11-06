@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import shutil
 import subprocess
 import threading
@@ -19,6 +20,22 @@ ALLOWED = frozenset({"research-lit", "comm-lit-review", "idea-discovery",
                     "auto-review-loop", "research-wiki", "research-pipeline"})
 DURATIONS = {10: 600, 60: 3600, 480: 28800}
 MAX_OUTPUT = 80_000
+
+
+def terminate_tree(proc):
+    """Stop the Codex CLI and its launcher children (not unrelated processes)."""
+    if proc is None or proc.poll() is not None:
+        return
+    if os.name == "nt":
+        # npm-installed codex.cmd can spawn another executable; killing only
+        # the .cmd PID would leave a research worker running after Stop.
+        subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                       capture_output=True, timeout=10, check=False)
+    else:
+        try:
+            os.killpg(proc.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
 
 class LiveCodex:
     def __init__(self):
@@ -82,7 +99,7 @@ class LiveCodex:
             proc = self.proc
         self.append("Stop requested by user.")
         if proc is not None:
-            proc.terminate()
+            terminate_tree(proc)
         return True
 
     def _worker(self, runid, skill, goal, minutes):
@@ -189,7 +206,7 @@ class LiveCodex:
                 proc = self.proc
                 self.proc = None
             if proc is not None and proc.poll() is None:
-                proc.terminate()
+                terminate_tree(proc)
                 try:
                     proc.wait(timeout=5)
                 except subprocess.TimeoutExpired:
