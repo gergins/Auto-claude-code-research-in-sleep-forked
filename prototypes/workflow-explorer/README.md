@@ -1,28 +1,38 @@
-# ARIS Workflow Explorer — fork-only prototype
+# ARIS Workflow Explorer — all-capabilities prototype
 
-Run locally: open `prototypes/workflow-explorer/index.html` in a modern browser. No installation or server is needed. No dependencies, cookies, API keys, external JavaScript, tracking or paid model calls.
+Run locally: open `prototypes/workflow-explorer/index.html` in a modern browser. No installation or server needed. No external JavaScript, API keys, tracking or paid model calls.
 
-## What it is
-A browser-based **read-only launcher** for real `skills/<name>/SKILL.md` workflows already in this fork. It exposes a curated 16-skill subset from the actual ARIS catalog, search and domain filters, input, documented effort/reviewer choices, original source links, and a copyable invocation for a supported installed ARIS host.
+## Inventory provenance and scope
+- **87 skills** are populated from `docs/SKILLS_CATALOG.md`, cross-referenced with verified skill-to-skill dependency definitions from `tools/skill-groups.tsv` on the original fork baseline at commit `2901234ad2954cd2388ced8d3aed2ed9de42803a`.
+- Each skill exposes its upstream title/summary, category, stated external requirements and direct skill dependencies, plus a link to its canonical `skills/<name>/SKILL.md`.
+- This is **catalog coverage**, not installed/executed capability verification. External requirements can include paid APIs/GPU. It is a curated user interface over the existing ARIS research methodology, not a competing research runtime.
+- The original ARIS source has 48 top-level tool entries, 11 MCP server directories, 19 template entries, 82 entries in the tests directory and five workflow files; existence does not establish successful execution.
+- The full catalog is checked into this HTML for offline access. It must be regenerated/reconciled with the upstream catalog and dependency registry when the upstream fork changes, to avoid stale entries.
+- The visual filters (Discover, Validate, Build, Publish, Improve) are prototype conveniences, not authoritative ARIS categorization. Original group names appear on skill cards.
 
-The application does **not** execute ARIS. Running ARIS still requires following upstream `SETUP_GUIDE.md` and configuring a supported AI coding environment and reviewer. Some skills need GPU, model/API services or installed tools. Treat costs and tool permissions as unapproved until deliberately configured.
+## Interaction
+1. Search across all 87 skills, including requirements, group names and dependency names; filter by workflow category.
+2. Select a skill, provide a research task, configure effort/reviewer, copy invocation to a supported **installed** ARIS host.
+3. Paste an externally obtained Codex/Claude response in **Capture research results**. Select evidence status.
+4. Export an explicit JSON research record containing source skill, generated command, actual pasted response, and `review_status: not-independently-verified`. It is only a local file download, not a GitHub commit or database update.
 
-## Testing and safety
-- Static single HTML file with embedded CSS/JS and no third-party runtime dependencies.
-- No remote API requests, installation, account handling, secret collection, file mutation, shell execution, or automatic agents.
-- Generated command syntax comes from `AGENT_GUIDE.md`; actual acceptance/behavior must be checked against the target SKILL.md and configured host.
-- Source links point to `main` for usability and can change with upstream updates; pin an exact commit for reproducible evaluations.
-- Prototype is NOT a full list of 87 ARIS skills and should not be represented as such.
-- Browser smoke test, automated accessibility test, upstream runtime integration and exact-HEAD CI remain **unverified**.
-- Do not merge/deploy until reviewed.
+## Why a pasted Codex answer is not an ARIS review receipt
+The copied `/auto-review-loop` instruction is only a command string. Without a compatible environment recognizing the original ARIS skill and recording review-state artifacts, a model can answer as ordinary research. Never label that as the ARIS auto-review-loop successfully running. The real skill may write `review-stage/AUTO_REVIEW.md`, `REVIEW_STATE.json` and evidence of reviewer identity/results.
 
-## Prototype acceptance checks (manual)
-1. Open local HTML without a server; page renders with 16 curated skills.
-2. Search `experiment` and filter `Validate`; choices narrow appropriately.
-3. Select `Experiment Plan`, enter a description, set `lite`; generated command begins `/experiment-plan` and references the user input.
-4. The original skill link opens `skills/experiment-plan/SKILL.md` on this fork.
-5. Copy button copies the generated invocation over HTTPS or via fallback on local browser.
-6. Use keyboard Tab/Enter/Space and check responsive layout at phone width.
+## Safety and validation
+- No repo-wide installers or model services are launched by this file.
+- The paste form may contain sensitive information. Do not paste secrets or user personal data; exported JSON is user-controlled.
+- The exported status is explicitly self-reported and NEVER confers independent security approval.
+- Accessibility and manual browser interaction tests, dynamic data updates, full external integration, Windows environment compatibility, and exact-HEAD CI are **pending**.
+- Potential follow-up: run existing ARIS tests against the exact PR SHA once CI is available, and perform synthetic tests in a configured isolated host. Do not automatically install 87 skills or run GPU workloads.
 
-## Next
-Only after validating the real prototype, consider adding: all catalog data extracted from real canonical skill specs; a safe read-only GitHub discovery tool; and a permissioned backend that can run a constrained single skill with explicit costs and independent review. Prefer ARIS's existing runtime instead of recreating an agent platform.
+## Manual smoke check
+1. Open HTML locally: 87 skills should appear across Discover/Validate/Build/Publish/Improve filters.
+2. Search `wiki`, `experiment`, `review`; results should narrow.
+3. Pick `/auto-review-loop`; confirm dependencies displayed, source URL points at this fork.
+4. Enter `proven open source for video relay service`, choose balanced + Codex and copy generated invocation.
+5. Paste the previously obtained Codex answer; export JSON and inspect `review_status` and `execution_status`.
+6. Test keyboard use, mobile width and empty-input warnings.
+7. Review all findings before permitting model calls, execution or integration with other repositories.
+
+Nothing merged/deployed and no spending or external execution initiated.
