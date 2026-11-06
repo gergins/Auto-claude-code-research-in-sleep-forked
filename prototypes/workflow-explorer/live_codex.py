@@ -89,10 +89,10 @@ class LiveCodex:
         room = HOME / runid
         try:
             room.mkdir(parents=True, exist_ok=False)
-            # Copy only the chosen native skill; no installations, symlinks or side effects.
-            dst = room / ".agents" / "skills" / skill
-            dst.mkdir(parents=True)
-            shutil.copyfile(SKILLS / skill / "SKILL.md", dst / "SKILL.md")
+            # Copy the complete Codex-native skill pack and its references into
+            # the isolated run folder. Original ARIS sources remain untouched.
+            # This preserves nested skill dependencies and shared-references.
+            shutil.copytree(SKILLS, room / ".agents" / "skills", symlinks=False)
             instructions = room / "AGENTS.md"
             instructions.write_text(
                 "Use the locally supplied Codex-native ARIS skill at "
