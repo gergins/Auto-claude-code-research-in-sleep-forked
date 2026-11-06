@@ -71,7 +71,7 @@ def metadata(record):
             "storage": str(RECORD_DIR / "latest.json")}
 
 
-def store_record(payload):
+def store_record(payload, *, source="user-imported-codex-result"):
     if not isinstance(payload, dict):
         raise ValueError("Expected a JSON research record.")
     content = payload.get("result")
@@ -82,7 +82,7 @@ def store_record(payload):
         raise ValueError("Invalid skill name.")
     # Preserve the source response, but never promote a user-provided verdict.
     record = {"schema_version": "0.2", "kind": "external-research-output",
-              "source": "user-imported-codex-result", "imported_at": now(),
+              "source": source, "imported_at": now(),
               "skill": skill,
               "invocation": str(payload.get("invocation", ""))[:2000],
               "execution_status": "unverified",
@@ -208,13 +208,28 @@ class Handler(BaseHTTPRequestHandler):
             self.send(404, b"Not found", "text/plain")
     def do_POST(self):
         endpoint = urlsplit(self.path).path
-        if endpoint not in ("/api/start", "/api/research", "/api/live/start", "/api/live/stop"):
+        if endpoint not in ("/api/start", "/api/research", "/api/live/start", "/api/live/stop", "/api/live/capture"):
             self.send(404, b"Not found", "text/plain"); return
         origin = self.headers.get("Origin", "")
         host = self.headers.get("Host", "")
         if (host not in ("127.0.0.1:8765", "localhost:8765") or
             (origin and origin not in ("http://127.0.0.1:8765", "http://localhost:8765"))):
             self.send(403, b"Local requests only", "text/plain"); return
+        if endpoint == "/api/live/capture":
+            snapshot = LIVE.snapshot()
+            if snapshot["status"] != "finished_unreviewed" or not snapshot.get("final_response"):
+                self.send(409, b"No completed Codex response to capture.", "text/plain"); return
+            try:
+                info = store_record({"skill": snapshot["skill"],
+                                     "invocation": snapshot["goal"],
+                                     "result": snapshot["final_response"]},
+                                    source="codex-live-cli")
+                with LOCK:
+                    DATA["record"] = info
+                log("Saved live Codex final response locally; independent review still pending.")
+            except ValueError as exc:
+                self.send(400, str(exc), "text/plain"); return
+            self.send(200, json.dumps({"saved": True, "record": info}), "application/json"); return
         if endpoint == "/api/live/stop":
             self.send(200, json.dumps({"stop_requested": LIVE.stop()}), "application/json")
             return
