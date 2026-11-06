@@ -27,7 +27,8 @@
  <div class="formrow"><label><input type="checkbox" id="live-confirm"> I authorize this bounded Codex CLI research run and understand it may consume credits; the application cannot enforce a monetary limit.</label></div>
  <div class="info"><button class="primary" id="live-start" disabled>Start real Codex research</button><button class="secondary" id="live-stop" disabled>Stop research</button><button class="secondary" id="live-capture" disabled>Capture Codex result into ARIS</button></div>
  <p id="live-status" class="muted" role="status" aria-live="polite">Not started.</p>
- <div class="panel" style="margin-top:12px"><h2>Actual Codex events and result</h2><pre id="live-output" tabindex="0" style="white-space:pre-wrap;max-height:340px;overflow:auto">No execution events.</pre></div>
+ <div class="panel" style="margin-top:12px"><h2>Codex research answer</h2><pre id="live-final" tabindex="0" style="white-space:pre-wrap;max-height:420px;overflow:auto">No research answer yet.</pre></div>
+ <div class="panel" style="margin-top:12px"><h2>Technical execution events (JSON)</h2><pre id="live-output" tabindex="0" style="white-space:pre-wrap;max-height:340px;overflow:auto">No execution events.</pre></div>
  <div class="notice"><strong>Assurance:</strong> Codex output is an AI research artifact, not proof of verified sources, real experiments or independent review. Missing prerequisites must remain blocked. The server must remain running and the PC must stay on. No automatic restart/resume of live processes.</div>
 </section>
 <section id="monitor" class="panel" style="margin-top:18px" aria-labelledby="monitor-heading">
@@ -170,6 +171,7 @@ draw();output();
     (x.exit_code!==null?" · Exit: "+x.exit_code:"")+
     " · Review: "+x.review_status;
    const messages=x.events.map(e=>e.at+" "+e.message).join("\n");
+   $("final").textContent=x.final_response||"No completed research answer yet.";
    $("output").textContent=(messages?"EVENTS\n"+messages+"\n\n":"")+(x.output||"No Codex output yet.");
   }catch(e){$("status").textContent="Local process status unavailable: "+e.message}
  }
