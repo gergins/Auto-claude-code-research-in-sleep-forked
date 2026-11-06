@@ -34,8 +34,22 @@
  <div class="formrow"><label><input type="checkbox" id="live-confirm"> I authorize this bounded Codex CLI research run and understand it may consume credits; the application cannot enforce a monetary limit.</label></div>
  <div class="info"><button class="primary" id="live-start" disabled>Start real Codex research</button><button class="secondary" id="live-stop" disabled>Stop research</button><button class="secondary" id="live-capture" disabled>Capture Codex result into ARIS</button></div>
  <p id="live-status" class="muted" role="status" aria-live="polite">Not started.</p>
- <div class="panel" style="margin-top:12px"><h2>Codex research answer</h2><pre id="live-final" tabindex="0" style="white-space:pre-wrap;max-height:420px;overflow:auto">No research answer yet.</pre></div>
- <div class="panel" style="margin-top:12px"><h2>Technical execution events (JSON)</h2><pre id="live-output" tabindex="0" style="white-space:pre-wrap;max-height:340px;overflow:auto">No execution events.</pre></div>
+ <div class="panel" style="margin-top:12px">
+  <h2>Research results</h2>
+  <div class="formrow"><label for="live-view">Choose what to view</label>
+   <select id="live-view">
+    <option value="report">Research report (recommended)</option>
+    <option value="findings">Findings &amp; evidence</option>
+    <option value="actions">Risks &amp; next actions</option>
+    <option value="original">Original Codex answer</option>
+    <option value="technical">Technical execution JSON</option>
+   </select>
+  </div>
+  <p id="live-view-note" class="muted">Readable views organize the original Codex text only; no claim is independently verified.</p>
+  <div id="live-report" tabindex="0" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:480px;overflow:auto">No research answer yet.</div>
+  <pre id="live-final" tabindex="0" hidden style="white-space:pre-wrap;max-height:420px;overflow:auto">No research answer yet.</pre>
+  <pre id="live-output" tabindex="0" hidden style="white-space:pre-wrap;max-height:340px;overflow:auto">No execution events.</pre>
+ </div>
  <div class="notice"><strong>Assurance:</strong> Codex output is an AI research artifact, not proof of verified sources, real experiments or independent review. Missing prerequisites must remain blocked. The server must remain running and the PC must stay on. No automatic restart/resume of live processes.</div>
 </section>
 <section id="monitor" class="panel" style="margin-top:18px" aria-labelledby="monitor-heading">
@@ -156,6 +170,50 @@ draw();output();
  const $=id=>document.getElementById("live-"+id);
  const local=/^http:\/\/(?:127\.0\.0\.1|localhost):8765$/.test(location.origin);
  if(!local){$("preflight").textContent="Live run needs the local Python server, not a file:// page.";return;}
+ let lastRun=null;
+ // Text-only grouping: do not infer provenance, evidence strength or reviewer approval.
+ function sections(markdown){
+  const pieces=[];let heading="Overview",lines=[];
+  for(const line of markdown.split(/\r?\n/)){
+   const match=line.match(/^#{1,4}\s+(.+)$/);
+   if(match){if(lines.length)pieces.push({heading,body:lines.join("\n").trim()});heading=match[1].trim();lines=[];}
+   else lines.push(line);
+  }
+  if(lines.length)pieces.push({heading,body:lines.join("\n").trim()});
+  return pieces.filter(x=>x.body);
+ }
+ function renderView(){
+  const mode=$("view").value, answer=lastRun?.final_response||"";
+  $("report").hidden=mode==="original"||mode==="technical";
+  $("final").hidden=mode!=="original";
+  $("output").hidden=mode!=="technical";
+  const notes={
+   report:"Original Codex response organized for reading. No external claims have been independently verified.",
+   findings:"Shows verbatim sections with matching headings. Missing sections are not invented.",
+   actions:"Shows verbatim sections with matching headings, not approval to implement them.",
+   original:"Unmodified Codex answer, preserving its original wording.",
+   technical:"Raw process events for debugging and audit; not a research report."
+  };
+  $("view-note").textContent=notes[mode]||notes.report;
+  if(mode==="original"||mode==="technical")return;
+  const blocks=sections(answer);
+  const pattern=mode==="findings"?/finding|evidence|source|reference|comparison|candidate|research|analysis|result|citation/i
+    :mode==="actions"?/risk|limitation|gap|recommend|next|action|decision|follow.up|uncertain|blocker/i:null;
+  const shown=pattern?blocks.filter(x=>pattern.test(x.heading)):blocks;
+  $("report").replaceChildren();
+  if(!answer.trim()){$("report").textContent="No completed research answer yet.";return;}
+  if(!shown.length){
+   $("report").textContent="No clearly titled "+(mode==="findings"?"findings/evidence":"risks/next-actions")+" sections were found. Select Original Codex answer to read everything.";
+   return;
+  }
+  for(const block of shown){
+    const section=document.createElement("section");section.style.marginBottom="18px";
+    const header=document.createElement("h3");header.textContent=block.heading;
+    const body=document.createElement("div");body.textContent=block.body;body.style.whiteSpace="pre-wrap";
+    section.append(header,body);$("report").append(section);
+  }
+ }
+ $("view").addEventListener("change",renderView);
  let ready=false, busy=false;
  async function preflight(){
   try{const r=await fetch("/api/live/check");const x=await r.json();
@@ -168,7 +226,7 @@ draw();output();
  }
  async function refresh(){
   try{const r=await fetch("/api/live/status",{cache:"no-store"});if(!r.ok)throw Error("status unavailable");
-   const x=await r.json();const active=["starting","running","stopping"].includes(x.status);
+   const x=await r.json();lastRun=x;const active=["starting","running","stopping"].includes(x.status);
    busy=active;
    $("start").disabled=!ready||!$("confirm").checked||active;
    $("stop").disabled=!active;
@@ -180,6 +238,7 @@ draw();output();
    const messages=x.events.map(e=>e.at+" "+e.message).join("\n");
    $("final").textContent=x.final_response||"No completed research answer yet.";
    $("output").textContent=(messages?"EVENTS\n"+messages+"\n\n":"")+(x.output||"No Codex output yet.");
+   renderView();
   }catch(e){$("status").textContent="Local process status unavailable: "+e.message}
  }
  $("confirm").addEventListener("change",()=>{$("start").disabled=!ready||!$("confirm").checked||busy});
