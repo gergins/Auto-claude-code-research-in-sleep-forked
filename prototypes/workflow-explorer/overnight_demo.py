@@ -103,7 +103,7 @@ def assess_record():
     if record is None:
         raise ValueError("No captured research record to assess.")
     txt = record["result"]
-    urls = list(dict.fromkeys(re.findall(r"https?://[^\\s<>\\]\\)\\\"']+", txt)))[:30]
+    urls = list(dict.fromkeys(url.rstrip(").,;]") for url in re.findall(r"https?://[^\\s<>]+", txt)))[:30]
     named = [x for x in ["LiveKit", "Janus", "Jitsi", "Jigasi", "RFC 9248"]
              if x.casefold() in txt.casefold()]
     result = {"source_sha256": metadata(record)["sha256"],
