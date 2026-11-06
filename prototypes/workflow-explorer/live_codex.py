@@ -27,7 +27,7 @@ class LiveCodex:
         self.state = {"status": "idle", "run_id": None, "started_at": None,
                       "ended_at": None, "deadline_minutes": None,
                       "skill": None, "goal": None, "events": [],
-                      "output": "", "exit_code": None, "error": None,
+                      "output": "", "final_response": "", "exit_code": None, "error": None,
                       "review_status": "not-independently-verified",
                       "acceptance": "not-accepted"}
 
@@ -67,7 +67,7 @@ class LiveCodex:
                           "started_at": datetime.now(timezone.utc).isoformat(),
                           "ended_at": None, "deadline_minutes": minutes,
                           "skill": skill, "goal": goal.strip(), "events": [],
-                          "output": "", "exit_code": None, "error": None,
+                          "output": "", "final_response": "", "exit_code": None, "error": None,
                           "review_status": "not-independently-verified",
                           "acceptance": "not-accepted"}
         threading.Thread(target=self._worker, args=(runid, skill, goal.strip(), minutes),
@@ -156,6 +156,11 @@ class LiveCodex:
                 try:
                     obj = json.loads(line)
                     kind = str(obj.get("type", "event"))
+                    if kind == "item.completed" and isinstance(obj.get("item"), dict):
+                        item = obj["item"]
+                        if item.get("type") == "agent_message" and isinstance(item.get("text"), str):
+                            with self.lock:
+                                self.state["final_response"] = item["text"][-MAX_OUTPUT:]
                     if kind in ("turn.completed", "turn.failed", "error", "item.completed"):
                         self.append(kind)
                 except ValueError:
@@ -163,7 +168,8 @@ class LiveCodex:
             code = self.proc.wait(timeout=10)
             with self.lock:
                 self.state["exit_code"] = code
-                self.state["status"] = "finished_unreviewed" if code == 0 else "failed"
+                self.state["status"] = ("stopped" if self.state["status"] == "stopping"
+                                        else "finished_unreviewed" if code == 0 else "failed")
                 self.state["ended_at"] = datetime.now(timezone.utc).isoformat()
             (room / "run-summary.json").write_text(
                 json.dumps(self.snapshot(), indent=2, ensure_ascii=False), encoding="utf-8")
