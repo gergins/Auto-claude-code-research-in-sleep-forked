@@ -39,7 +39,7 @@ $("importFile").addEventListener("change",async()=>{
   const record=JSON.parse(await file.text());
   if(typeof record.result!=="string"||!record.result.trim())throw Error("JSON record has no research result.");
   $("result").value=record.result;
-  if(typeof record.invocation==="string"){const task=record.invocation.match(/^\\/[^ ]+\\s+"([^"]+)"/);if(task)$("direction").value=task[1];}
+  if(typeof record.invocation==="string"){const quoted=record.invocation.split('"');if(quoted.length>1)$("direction").value=quoted[1];}
   const skill=skills.find(x=>x.id===record.skill);
   if(skill){selected=skill;draw();output();}
   $("saveStatus").textContent="Imported "+file.name+" into the form. Click Save result to local ARIS workspace.";
