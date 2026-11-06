@@ -1,3 +1,39 @@
+# Connected Codex Result → Local ARIS State (new)
+
+The web page now supports a genuine **local intake** of a Codex research result: choose the already-exported JSON or paste the response, click **Save result to local ARIS workspace**, and then **Start review workflow (local checks)**. The runner uses the saved result as its input, records a SHA-256 checksum, extracts candidate mentions and source URLs, and writes unaccepted phase artifacts through the existing `tools/run_state.py`. AI reviewer, source fetches and claims verification remain unperformed.
+
+## Update the existing Windows clone
+
+Stop the old Python process using Ctrl+C first, then in PowerShell:
+
+```powershell
+$ErrorActionPreference = "Stop"
+$branch = "prototype/aris-workflow-launcher-20261106"
+$repo = "gergins/Auto-claude-code-research-in-sleep-forked"
+$folder = Join-Path $HOME "Projects\ARIS-combined-workspace"
+if (!(Test-Path $folder)) { $folder = Join-Path $HOME "Projects\ARIS-fork-demo" }
+if (!(Test-Path (Join-Path $folder "tools\run_state.py"))) { throw "Existing ARIS fork directory not found" }
+$ui = Join-Path $folder "prototypes\workflow-explorer"
+foreach ($name in @("index.html","overnight_demo.py")) {
+  $target = Join-Path $ui $name
+  if (Test-Path $target) { Copy-Item $target "$target.bak" -Force }
+  $url = "https://raw.githubusercontent.com/$repo/$branch/prototypes/workflow-explorer/$name"
+  Invoke-WebRequest -Uri $url -OutFile $target
+}
+Set-Location $folder
+$env:PYTHONUTF8 = "1"
+python .\prototypes\workflow-explorer\overnight_demo.py
+```
+
+Open **http://127.0.0.1:8765/** (Ctrl+F5). Under **Capture Codex results**, choose the JSON you downloaded before (or paste the response), then click **Save result to local ARIS workspace**. Under **Live run monitor**, click **Start review workflow (local checks)**. Inspect the record hash, extracted candidate mentions and source URLs, actual run phase statuses and review gate.
+
+**Local persistence**: the response is written to `~/.aris-research-workspace/records/latest.json` on your PC (user-profile path). It survives server restarts, though each new save replaces the `latest.json` copy; keep exported backups for multiple research runs. It is not uploaded to GitHub.
+
+**Security**: server binds only 127.0.0.1:8765; local-only POST, JSON-only limit 128 KiB; no user-supplied filesystem path is evaluated; the result is treated as text, not executed. Do not paste passwords or private personal data. Test and browser verification are not yet confirmed.
+
+**Evidence**: User-pasted claims remain unverified. The runner's final phase is `done` (code ran), **not `accepted`** (independently verified). It does not call Codex, Claude, GitHub, or external APIs. Actual autonomous research still needs a separately configured ARIS agent host, explicit model budgets/permissions and reviewer receipt verification.
+
+---
 ## Windows fix: Run failed / Unicode charmap U+2192
 
 If the monitor shows `Run failed` and activity shows `charmap codec can't encode character '\\u2192'`, the old launcher used Windows' default cp1252 for the ARIS child process. This is fixed in the prototype branch by forcing `PYTHONIOENCODING=utf-8` and `PYTHONUTF8=1` in the child subprocess.
