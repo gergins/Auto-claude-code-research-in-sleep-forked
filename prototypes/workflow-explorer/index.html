@@ -16,6 +16,12 @@
     <div class="panel"><h2>Phase progress</h2><div id="monitor-phases" aria-live="polite">No run yet</div></div>
     <div class="panel"><h2>Activity</h2><div id="monitor-history" role="log" aria-live="polite" style="max-height:230px;overflow:auto">Waiting for local runner</div></div>
   </div>
+  <div class="panel" style="margin-top:14px">
+    <h2>Findings from your saved Codex result</h2>
+    <p class="muted" id="monitor-record">No saved research result loaded.</p>
+    <p class="muted" id="monitor-evidence">No source verification or independent review has been performed.</p>
+    <div id="monitor-findings" aria-live="polite">Save your result and start the local checks to see extracted names and links.</div>
+  </div>
   <div class="formrow"><label for="monitor-state">Original ARIS run-state JSON</label><pre id="monitor-state" tabindex="0">No run state</pre></div>
   <div class="notice"><strong>Not an overnight AI run.</strong> Capturing sources and completing the local checks does not mean the research was independently reviewed. The runner binds to 127.0.0.1 and must remain open for monitoring. For real research, install and authorize ARIS in a supported AI coding environment.</div>
 </section>
@@ -84,6 +90,16 @@ draw();output();
         const status=document.createElement("span");status.textContent=p.status;status.style.color=p.status==="done"?"#75e1c8":p.status==="running"?"#f1cd82":"#aebfd2";
         div.append(strong,status);return div;
       }));
+      ids("record").textContent=data.record?"Saved: /"+data.record.skill+" · "+data.record.characters+" characters · SHA-256 "+data.record.sha256.slice(0,12)+"…":"No saved research result loaded.";
+      ids("evidence").textContent="Evidence status: unverified · AI reviewer: not performed · External links: not fetched";
+      const extracted=data.assessment;
+      if(extracted){
+        const items=document.createElement("div");items.className="info";
+        for(const name of extracted.mentions){const label=document.createElement("span");label.className="pill";label.textContent=name;items.append(label);}
+        const urls=document.createElement("div");urls.style.cssText="display:grid;gap:6px;margin-top:10px";
+        for(const url of extracted.candidate_urls){const line=document.createElement("div");line.className="muted";line.textContent=url;urls.append(line);}
+        ids("findings").replaceChildren(items,urls);
+      } else if(data.record)ids("findings").textContent="Record saved. Start the local checks to extract candidate names and links.";
       ids("state").textContent=data.run_state?JSON.stringify({record:data.record,assessment:data.assessment,run_state:data.run_state},null,2):data.record?"Research record saved. Start demo to inspect it.":"No run state";
       ids("start").disabled=busy||data.status!=="idle"||!data.record;
       ids("notice").textContent=({idle:data.record?"Research record loaded; ready to analyze locally.":"No Codex research record loaded. Use Capture Codex Results → Save result to local ARIS workspace first.",starting:"Starting…",running:"Running: "+(data.phase||"initialization"),finished_unreviewed:"Research record indexed. Source verification and independent AI review NOT performed.",failed:"Local demo failed; see activity log."})[data.status]||data.status;
