@@ -114,8 +114,10 @@ class LiveCodex:
                 "different-family reviewer, report it as blocked.\n\nGOAL:\n" + goal)
             # The CLI must run in a restricted writable-free sandbox. CLI emits
             # structured events on stdout; no shell interpolation of user text.
+            # Send the untrusted research goal over stdin, never as a shell/CLI
+            # argument. This also avoids Windows .cmd argument expansion risks.
             cmd = [shutil.which("codex"), "exec", "--json", "--sandbox",
-                   "read-only", "--skip-git-repo-check", "-C", str(room), prompt]
+                   "read-only", "--skip-git-repo-check", "-C", str(room), "-"]
             self.append("Starting real Codex CLI. Read-only sandbox. No elevated permissions.")
             env = os.environ.copy()
             env["PYTHONIOENCODING"] = "utf-8"
@@ -123,10 +125,12 @@ class LiveCodex:
                 if self.state["status"] == "stopping":
                     raise RuntimeError("Cancelled before process launch.")
                 self.proc = subprocess.Popen(cmd, cwd=room, env=env,
-                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                    text=True, encoding="utf-8", errors="replace",
-                    bufsize=1)
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT, text=True, encoding="utf-8",
+                    errors="replace", bufsize=1)
                 self.state["status"] = "running"
+            self.proc.stdin.write(prompt)
+            self.proc.stdin.close()
             deadline = time.monotonic() + DURATIONS[minutes]
             # Reader thread avoids blocking timeout checks when CLI goes quiet.
             import queue
