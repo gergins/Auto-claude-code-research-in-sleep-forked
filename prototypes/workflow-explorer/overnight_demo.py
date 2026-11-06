@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
+from live_codex import LIVE, ALLOWED
 
 ROOT = Path(__file__).resolve().parents[2]
 ARIS_STATE_TOOL = ROOT / "tools" / "run_state.py"
@@ -195,6 +196,10 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/", "/monitor.html"):
             file = Path(__file__).with_name("index.html")
             self.send(200, file.read_bytes(), "text/html; charset=utf-8")
+        elif path == "/api/live/status":
+            self.send(200, json.dumps(LIVE.snapshot()).encode("utf-8"), "application/json")
+        elif path == "/api/live/check":
+            self.send(200, json.dumps(LIVE.check()).encode("utf-8"), "application/json")
         elif path == "/api/status":
             with LOCK:
                 snapshot = json.loads(json.dumps(DATA))
@@ -203,13 +208,34 @@ class Handler(BaseHTTPRequestHandler):
             self.send(404, b"Not found", "text/plain")
     def do_POST(self):
         endpoint = urlsplit(self.path).path
-        if endpoint not in ("/api/start", "/api/research"):
+        if endpoint not in ("/api/start", "/api/research", "/api/live/start", "/api/live/stop"):
             self.send(404, b"Not found", "text/plain"); return
         origin = self.headers.get("Origin", "")
         host = self.headers.get("Host", "")
         if (host not in ("127.0.0.1:8765", "localhost:8765") or
             (origin and origin not in ("http://127.0.0.1:8765", "http://localhost:8765"))):
             self.send(403, b"Local requests only", "text/plain"); return
+        if endpoint == "/api/live/stop":
+            self.send(200, json.dumps({"stop_requested": LIVE.stop()}), "application/json")
+            return
+        if endpoint == "/api/live/start":
+            length = self.headers.get("Content-Length", "")
+            if not length.isdigit() or int(length) < 2 or int(length) > 8192:
+                self.send(413, b"Invalid live-request length", "text/plain"); return
+            if not self.headers.get("Content-Type", "").startswith("application/json"):
+                self.send(415, b"JSON required", "text/plain"); return
+            try:
+                request = json.loads(self.rfile.read(int(length)))
+                if not isinstance(request, dict) or request.get("confirmed") is not True:
+                    raise ValueError("Explicit confirmation is required.")
+                minutes = request.get("minutes")
+                if type(minutes) is not int:
+                    raise ValueError("Invalid time limit")
+                current = LIVE.start(request.get("skill"), request.get("goal"), minutes)
+            except (ValueError, RuntimeError) as exc:
+                self.send(400, str(exc), "text/plain"); return
+            self.send(202, json.dumps({"started": True, "run_id": current["run_id"]}),
+                      "application/json"); return
         if endpoint == "/api/research":
             length = self.headers.get("Content-Length", "")
             if not length.isdigit() or int(length) < 2 or int(length) > MAX_BODY:
@@ -251,4 +277,6 @@ if __name__ == "__main__":
     print("No model calls. No paid services. Ctrl+C stops the demo server.", flush=True)
     try: server.serve_forever()
     except KeyboardInterrupt: pass
-    finally: server.server_close()
+    finally:
+        LIVE.stop()
+        server.server_close()
