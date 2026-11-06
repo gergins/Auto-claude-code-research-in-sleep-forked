@@ -23,6 +23,13 @@
  <option value="research-pipeline">Full research pipeline (many steps may be blocked in read-only mode)</option>
  </select></div>
  <div class="formrow"><label for="live-goal">Research goal</label><textarea id="live-goal" rows="3" maxlength="2000">Find and critically compare proven open-source components for a three-party Deaf video relay service, including LiveKit, LiveKit SIP, Janus, Jitsi, evidence links, risks and missing verification.</textarea></div>
+ <div class="formrow"><label for="live-model">Codex model (overrides your incompatible global model only for this run)</label>
+ <select id="live-model">
+ <option value="gpt-6-astra">GPT-6 Astra — recommended research model</option>
+ <option value="gpt-6.1-sol">GPT-6.1 Sol — balanced</option>
+ <option value="gpt-6-luna">GPT-6 Luna — lightweight</option>
+ </select>
+ <p class="muted">Models are listed from OpenAI's catalog; availability through your signed-in Codex account is verified when you start. The previous gpt-5.4 setting failed with a model-not-supported error.</p></div>
  <div class="formrow"><label for="live-duration">Maximum allowed runtime</label><select id="live-duration"><option value="10">10 minutes — first test</option><option value="60">60 minutes</option><option value="480">8 hours — unattended, explicit opt-in</option></select></div>
  <div class="formrow"><label><input type="checkbox" id="live-confirm"> I authorize this bounded Codex CLI research run and understand it may consume credits; the application cannot enforce a monetary limit.</label></div>
  <div class="info"><button class="primary" id="live-start" disabled>Start real Codex research</button><button class="secondary" id="live-stop" disabled>Stop research</button><button class="secondary" id="live-capture" disabled>Capture Codex result into ARIS</button></div>
@@ -166,7 +173,7 @@ draw();output();
    $("start").disabled=!ready||!$("confirm").checked||active;
    $("stop").disabled=!active;
    $("capture").disabled=x.status!=="finished_unreviewed"||!x.final_response;
-   $("status").textContent="Status: "+x.status+(x.run_id?" · Run: "+x.run_id:"")+
+   $("status").textContent="Status: "+x.status+(x.run_id?" · Run: "+x.run_id:"")+(x.model?" · Model: "+x.model:"")+
     (x.error?" · Error: "+x.error:"")+
     (x.exit_code!==null?" · Exit: "+x.exit_code:"")+
     " · Review: "+x.review_status;
@@ -181,7 +188,7 @@ draw();output();
   $("start").disabled=true;
   try{
    const r=await fetch("/api/live/start",{method:"POST",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({skill:$("skill").value,goal:$("goal").value,
+    body:JSON.stringify({skill:$("skill").value,model:$("model").value,goal:$("goal").value,
       minutes:Number($("duration").value),confirmed:true})});
    if(!r.ok)throw Error(await r.text());
    $("status").textContent="Codex launch requested.";
