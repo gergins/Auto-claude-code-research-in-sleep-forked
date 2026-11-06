@@ -50,10 +50,20 @@ class LiveCodex:
 
     def check(self):
         executable = shutil.which("codex")
+        signed_in = False
+        if executable:
+            try:
+                status = subprocess.run([executable, "login", "status"],
+                                        stdout=subprocess.DEVNULL,
+                                        stderr=subprocess.DEVNULL,
+                                        timeout=8, check=False)
+                signed_in = status.returncode == 0
+            except (OSError, subprocess.TimeoutExpired):
+                signed_in = False
         return {"available": executable is not None,
-                "command": executable or None,
+                "signed_in": signed_in,
                 "skill_pack": SKILLS.is_dir(),
-                "note": "Requires a signed-in Codex CLI. Presence does not prove authentication or credits."}
+                "note": "Authentication is checked via codex login status; remaining credits cannot be verified."}
 
     def snapshot(self):
         with self.lock:
@@ -76,6 +86,8 @@ class LiveCodex:
         status = self.check()
         if not status["available"]:
             raise RuntimeError("Codex CLI unavailable. Install and sign in independently; no automatic installation.")
+        if not status["signed_in"]:
+            raise RuntimeError("Codex CLI is not signed in. Run codex login in PowerShell first.")
         with self.lock:
             if self.state["status"] in ("starting", "running", "stopping"):
                 raise RuntimeError("Another live Codex execution is already active.")
