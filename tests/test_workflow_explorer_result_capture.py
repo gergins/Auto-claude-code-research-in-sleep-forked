@@ -2,11 +2,13 @@
 import importlib.util
 import json
 import tempfile
+import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 SCRIPT = Path(__file__).resolve().parents[1] / "prototypes" / "workflow-explorer" / "overnight_demo.py"
+sys.path.insert(0, str(SCRIPT.parent))
 spec = importlib.util.spec_from_file_location("aris_research_local_demo", SCRIPT)
 demo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(demo)
