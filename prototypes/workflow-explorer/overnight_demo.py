@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ARIS offline run-state demonstration. Local-only, no model calls or installation."""
+"""ARIS offline run-state demonstration and combined browser workspace. Local-only; no AI model calls."""
 from __future__ import annotations
 import json
 import os
@@ -114,7 +114,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = urlsplit(self.path).path
         if path in ("/", "/monitor.html"):
-            file = Path(__file__).with_name("monitor.html")
+            file = Path(__file__).with_name("index.html")
             self.send(200, file.read_bytes(), "text/html; charset=utf-8")
         elif path == "/api/status":
             with LOCK:
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     if not ARIS_STATE_TOOL.is_file():
         raise SystemExit("Run inside the full ARIS fork: missing tools/run_state.py")
     server = ThreadingHTTPServer(("127.0.0.1", 8765), Handler)
-    print("ARIS Offline Monitor: http://127.0.0.1:8765", flush=True)
+    print("ARIS Combined Research Workspace: http://127.0.0.1:8765", flush=True)
     print("No model calls. No paid services. Ctrl+C stops the demo server.", flush=True)
     try: server.serve_forever()
     except KeyboardInterrupt: pass
