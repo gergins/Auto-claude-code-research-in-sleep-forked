@@ -289,7 +289,8 @@ if __name__ == "__main__":
         DATA["record"] = metadata(existing)
     server = ThreadingHTTPServer(("127.0.0.1", 8765), Handler)
     print("ARIS Combined Research Workspace: http://127.0.0.1:8765", flush=True)
-    print("No model calls. No paid services. Ctrl+C stops the demo server.", flush=True)
+    print("Local checks use no AI. The optional Live Codex button DOES invoke AI and may consume credits.", flush=True)
+    print("Stop with Ctrl+C; stop live research in the browser first.", flush=True)
     try: server.serve_forever()
     except KeyboardInterrupt: pass
     finally:
