@@ -19,6 +19,8 @@ HOME = Path.home() / ".aris-research-workspace" / "live-runs"
 ALLOWED = frozenset({"research-lit", "comm-lit-review", "idea-discovery",
                     "auto-review-loop", "research-wiki", "research-pipeline"})
 DURATIONS = {10: 600, 60: 3600, 480: 28800}
+# User-visible IDs from OpenAI model catalog. Account entitlement is verified by the service at runtime.
+MODELS = frozenset({"gpt-6-astra", "gpt-6.1-sol", "gpt-6-luna"})
 MAX_OUTPUT = 80_000
 
 
@@ -43,7 +45,7 @@ class LiveCodex:
         self.proc = None
         self.state = {"status": "idle", "run_id": None, "started_at": None,
                       "ended_at": None, "deadline_minutes": None,
-                      "skill": None, "goal": None, "events": [],
+                      "skill": None, "goal": None, "model": None, "events": [],
                       "output": "", "final_response": "", "exit_code": None, "error": None,
                       "review_status": "not-independently-verified",
                       "acceptance": "not-accepted"}
@@ -76,9 +78,11 @@ class LiveCodex:
                                          "message": str(event)[:1000]})
             self.state["events"] = self.state["events"][-100:]
 
-    def start(self, skill: str, goal: str, minutes: int):
+    def start(self, skill: str, goal: str, minutes: int, model: str = "gpt-6-astra"):
         if skill not in ALLOWED or not (SKILLS / skill / "SKILL.md").is_file():
             raise ValueError("Skill is not allowlisted or its Codex source is missing.")
+        if model not in MODELS:
+            raise ValueError("Model is not allowed; select an offered model.")
         if minutes not in DURATIONS:
             raise ValueError("Choose 10, 60 or 480 minutes.")
         if not isinstance(goal, str) or not (10 <= len(goal.strip()) <= 2000):
@@ -95,11 +99,11 @@ class LiveCodex:
             self.state = {"status": "starting", "run_id": runid,
                           "started_at": datetime.now(timezone.utc).isoformat(),
                           "ended_at": None, "deadline_minutes": minutes,
-                          "skill": skill, "goal": goal.strip(), "events": [],
+                          "skill": skill, "goal": goal.strip(), "model": model, "events": [],
                           "output": "", "final_response": "", "exit_code": None, "error": None,
                           "review_status": "not-independently-verified",
                           "acceptance": "not-accepted"}
-        threading.Thread(target=self._worker, args=(runid, skill, goal.strip(), minutes),
+        threading.Thread(target=self._worker, args=(runid, skill, goal.strip(), minutes, model),
                          daemon=True).start()
         return self.snapshot()
 
@@ -114,7 +118,7 @@ class LiveCodex:
             terminate_tree(proc)
         return True
 
-    def _worker(self, runid, skill, goal, minutes):
+    def _worker(self, runid, skill, goal, minutes, model):
         room = HOME / runid
         try:
             room.mkdir(parents=True, exist_ok=False)
@@ -145,9 +149,9 @@ class LiveCodex:
             # structured events on stdout; no shell interpolation of user text.
             # Send the untrusted research goal over stdin, never as a shell/CLI
             # argument. This also avoids Windows .cmd argument expansion risks.
-            cmd = [shutil.which("codex"), "exec", "--json", "--sandbox",
+            cmd = [shutil.which("codex"), "exec", "--json", "-m", model, "--sandbox",
                    "read-only", "--skip-git-repo-check", "-C", str(room), "-"]
-            self.append("Starting real Codex CLI. Read-only sandbox. No elevated permissions.")
+            self.append("Starting real Codex CLI with explicit model "+model+". Read-only sandbox.")
             env = os.environ.copy()
             env["PYTHONIOENCODING"] = "utf-8"
             with self.lock:
@@ -199,6 +203,16 @@ class LiveCodex:
                 except ValueError:
                     self.append(line.strip()[:200])
             code = self.proc.wait(timeout=10)
+            if code != 0:
+                with self.lock:
+                    tail = self.state["output"][-16000:]
+                    if "model is not supported when using Codex with a ChatGPT account" in tail or "model not found" in tail.lower():
+                        self.state["error"] = ("Selected model " + model +
+                          " is unavailable for this ChatGPT Codex account. Choose another listed model; do not edit the global Codex configuration.")
+                    elif "missing YAML frontmatter" in tail:
+                        self.state["error"] = "Codex found a malformed SKILL.md in its skill search paths; check the named file."
+                    else:
+                        self.state["error"] = "Codex exited with code " + str(code) + ". Inspect technical events."
             with self.lock:
                 self.state["exit_code"] = code
                 self.state["status"] = ("stopped" if self.state["status"] == "stopping"
