@@ -1,3 +1,25 @@
+## Windows fix: Run failed / Unicode charmap U+2192
+
+If the monitor shows `Run failed` and activity shows `charmap codec can't encode character '\\u2192'`, the old launcher used Windows' default cp1252 for the ARIS child process. This is fixed in the prototype branch by forcing `PYTHONIOENCODING=utf-8` and `PYTHONUTF8=1` in the child subprocess.
+
+Stop the current Python web server in its PowerShell window with **Ctrl+C**. To update just the launcher inside a clone that already has the prototype files, run:
+
+```powershell
+$ErrorActionPreference = "Stop"
+$folder = Join-Path $HOME "Projects\ARIS-combined-workspace"
+if (!(Test-Path (Join-Path $folder "prototypes\workflow-explorer\overnight_demo.py"))) { throw "Combined workspace not found at $folder" }
+$uri = "https://raw.githubusercontent.com/gergins/Auto-claude-code-research-in-sleep-forked/prototype/aris-workflow-launcher-20261106/prototypes/workflow-explorer/overnight_demo.py"
+$file = Join-Path $folder "prototypes\workflow-explorer\overnight_demo.py"
+Invoke-WebRequest -Uri $uri -OutFile $file
+Set-Location $folder
+python .\prototypes\workflow-explorer\overnight_demo.py
+```
+
+Reopen http://127.0.0.1:8765/ (not the old monitor.html) and click Start bounded local demo. A new Python process resets the one-run-only state. If you used `Projects\ARIS-fork-demo` instead, replace `$folder` accordingly.
+
+**Safety:** this updates only the launcher file inside that known local clone; no merge/deploy. If you edited that file yourself, back it up first. Only launch code you trust.
+
+---
 # ARIS Combined Research Workspace — Single Page
 
 The former separate Workflow Explorer and monitor now appear on one browser page: `prototypes/workflow-explorer/index.html`.
