@@ -1,3 +1,20 @@
+## Windows run failure observed 2026-11-06 — incompatible inherited model
+
+The first actual Codex process ran, then returned HTTP 400 `model_not_found`: global Codex config selected `gpt-5.4`, which was **not supported for the connected ChatGPT Codex account**. A separate skill discovery warning showed `C:\\.agents\\skills\\task-planning\\SKILL.md` has missing YAML frontmatter; this is not the model rejection that failed the turn.
+
+**Fix in branch:** model selector added to the live UI, with per-invocation `-m` flag overriding global model without changing the user's Codex settings; default candidate `gpt-6-astra` plus `gpt-6.1-sol` and `gpt-6-luna`. The user's account may not have access to every listed model; the service decides at runtime and errors remain visible. Technical log and explanatory error are preserved. Do not claim that simply specifying a catalog model proves access.
+
+**Recovery:** stop the local Python server; update `index.html`, `overnight_demo.py`, and `live_codex.py` again from the draft branch; restart the Python server, Ctrl+F5, choose a model, and try a 10-minute read-only run. Optional separate read-only inspection of malformed skill file:
+
+```powershell
+$skill = 'C:\\.agents\\skills\\task-planning\\SKILL.md'
+if (Test-Path $skill) { Get-Content -LiteralPath $skill -TotalCount 12 }
+```
+
+Do not overwrite/remove unrelated skills or edit the user's global model configuration without separate review.
+
+---
+
 # Real ARIS research through Codex CLI — opt-in preview
 
 This is an **initial real execution adapter**, not a complete autonomous ARIS research runtime. It runs a *selected Codex-native ARIS skill* through the installed Codex CLI. It does not run all 87 skills or magically perform missing experiments/reviewers. Read-only constraints can block particular skill stages. All claims remain unverified unless backed by independently checked evidence.
