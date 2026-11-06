@@ -1,4 +1,31 @@
-# ARIS Workflow Explorer — all-capabilities prototype
+# ARIS Combined Research Workspace — Single Page
+
+The former separate Workflow Explorer and monitor now appear on one browser page: `prototypes/workflow-explorer/index.html`.
+
+Included: (1) all 87 documented ARIS skills and command generation, (2) a Codex/Claude result-pasting section with JSON export and unverified-evidence labels, (3) local live run-state monitoring using original `tools/run_state.py`.
+
+## Run all three on Windows PowerShell
+
+Clone into a **new** folder (no changes to existing local repositories):
+
+```powershell
+$ErrorActionPreference = "Stop"
+$target = Join-Path $HOME "Projects\ARIS-combined-workspace"
+git clone --depth 1 --branch prototype/aris-workflow-launcher-20261106 https://github.com/gergins/Auto-claude-code-research-in-sleep-forked.git $target
+Set-Location $target
+python .\prototypes\workflow-explorer\overnight_demo.py
+```
+
+Leave PowerShell open. Open **http://127.0.0.1:8765/** in your browser. The top navigation jumps to the skill catalog, **Capture Codex results**, and **Live run monitor**. Paste the prior LiveKit/Codex answer in Capture results. Click **Start bounded local demo** to see genuine ARIS phase tracking. Export a local JSON file when desired.
+
+Opening `index.html` directly works for browsing/capture but the monitor remains offline. The legacy `monitor.html` now redirects to the combined page.
+
+**Verified architecture only:** local source checks and real phase tracking. **Not executed:** AI research, independent Codex review, overnight tasks, GPU. Pasted results are not automatically analyzed or saved to GitHub. Run-state source exists on the fork; Windows end-to-end tests and exact-HEAD CI remain unverified.
+
+Security: server is bound only to 127.0.0.1, no model calls, credentials, installations, uploads or deployments. Avoid pasting secrets. Stop server with Ctrl+C. Review code before running it.
+
+---
+# Previous catalog notes
 
 Run locally: open `prototypes/workflow-explorer/index.html` in a modern browser. No installation or server needed. No external JavaScript, API keys, tracking or paid model calls.
 
